@@ -6,6 +6,14 @@ from levels import MAZE_LEVELS
 CELL_SIZE = 40
 CHEESE_POS = (9, 9)
 
+# User level select
+level_choice = input("Select level (1 = Easy, 2 = Medium, 3 = Hard): ")
+if level_choice not in ["1", "2", "3"]:
+    print("Invalid choice! Defaulting to Level 1")
+    level_choice = "1"
+
+maze = MAZE_LEVELS[int(level_choice) - 1]
+
 pygame.init()
 screen = pygame.display.set_mode((CELL_SIZE * 10, CELL_SIZE * 10))
 pygame.display.set_caption("Mouse and Cheese Maze")
@@ -17,7 +25,7 @@ cheese_img = pygame.image.load("assets/cheese.png")
 cheese_img = pygame.transform.scale(cheese_img, (CELL_SIZE, CELL_SIZE))
 
 mouse = Mouse(start_pos=(0, 0))
-maze = MAZE_LEVELS[0]
+
 
 running = True
 while running:
