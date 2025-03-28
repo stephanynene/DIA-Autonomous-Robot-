@@ -26,12 +26,19 @@ cheese_img = pygame.transform.scale(cheese_img, (CELL_SIZE, CELL_SIZE))
 
 mouse = Mouse(start_pos=(0, 0))
 
+# Timer setup for smooth movement
+MOVE_EVENT = pygame.USEREVENT + 1
+pygame.time.set_timer(MOVE_EVENT, 1500)  # Move every 1500 milliseconds (1.5 seconds)
 
 running = True
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+
+        # Trigger mouse movement only when MOVE_EVENT is triggered
+        if event.type == MOVE_EVENT:
+            mouse.move(maze)
 
     screen.fill((255, 255, 255))
     draw_maze(screen, maze)
@@ -43,6 +50,6 @@ while running:
     mouse.draw(screen, mouse_img)
 
     pygame.display.flip()
-    clock.tick(30)
+    clock.tick(30)  # Frame rate (30 frames per second)
 
 pygame.quit()
