@@ -12,10 +12,20 @@ if level_choice not in ["1", "2", "3"]:
     print("Invalid choice! Defaulting to Level 1")
     level_choice = "1"
 
-maze = MAZE_LEVELS[int(level_choice) - 1]
+level_index = int(level_choice) - 1
+level_data = MAZE_LEVELS[level_index]
+
+maze = level_data["layout"]
+maze_size = level_data["size"]
+
+WINDOW_WIDTH = maze_size[0] * CELL_SIZE
+WINDOW_HEIGHT = maze_size[1] * CELL_SIZE
+
+screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+
 
 pygame.init()
-screen = pygame.display.set_mode((CELL_SIZE * 10, CELL_SIZE * 10))
+# screen = pygame.display.set_mode((CELL_SIZE * 10, CELL_SIZE * 10))
 pygame.display.set_caption("Mouse and Cheese Maze")
 clock = pygame.time.Clock()
 
