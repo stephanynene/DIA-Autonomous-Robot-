@@ -4,7 +4,6 @@ from agent import Mouse
 from levels import MAZE_LEVELS
 
 CELL_SIZE = 40
-CHEESE_POS = (9, 9)
 
 # User level select
 level_choice = input("Select level (1 = Easy, 2 = Medium, 3 = Hard): ")
@@ -20,6 +19,8 @@ maze_size = level_data["size"]
 
 WINDOW_WIDTH = maze_size[0] * CELL_SIZE
 WINDOW_HEIGHT = maze_size[1] * CELL_SIZE
+
+CHEESE_POS = (maze_size[0] - 1, maze_size[1] - 1)
 
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
