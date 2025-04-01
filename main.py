@@ -28,7 +28,7 @@ mouse = Mouse(start_pos=(0, 0))
 
 # Timer setup for smooth movement
 MOVE_EVENT = pygame.USEREVENT + 1
-pygame.time.set_timer(MOVE_EVENT, 1500)  # Move every 1500 milliseconds (1.5 seconds)
+pygame.time.set_timer(MOVE_EVENT, 70)  # Move every 1500 milliseconds (1.5 seconds)
 
 running = True
 while running:
