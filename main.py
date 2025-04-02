@@ -4,6 +4,7 @@ from agent import Mouse
 from levels import MAZE_LEVELS
 
 CELL_SIZE = 40
+cheese_collected = False
 
 # User level select
 level_choice = input("Select level (1 = Easy, 2 = Medium, 3 = Hard): ")
@@ -39,7 +40,7 @@ mouse = Mouse(start_pos=(0, 0))
 
 # Timer setup for smooth movement
 MOVE_EVENT = pygame.USEREVENT + 1
-pygame.time.set_timer(MOVE_EVENT, 70)  # Move every 1500 milliseconds (1.5 seconds)
+pygame.time.set_timer(MOVE_EVENT, 100)  # Move every 1500 milliseconds (1.5 seconds)
 
 running = True
 while running:
@@ -49,14 +50,20 @@ while running:
 
         # Trigger mouse movement only when MOVE_EVENT is triggered
         if event.type == MOVE_EVENT:
-            mouse.move(maze)
+            # Stop if the cheese has been collected
+
+                if not cheese_collected:
+                 mouse.move(maze)
+                if not cheese_collected and mouse.position == CHEESE_POS:
+                    cheese_collected = True
+                    print("Cheese collected!")
+
 
     screen.fill((255, 255, 255))
     draw_maze(screen, maze)
 
     # Draw cheese
     screen.blit(cheese_img, (CHEESE_POS[0] * CELL_SIZE, CHEESE_POS[1] * CELL_SIZE))
-
     # Draw mouse
     mouse.draw(screen, mouse_img)
 
