@@ -9,7 +9,8 @@ class Mouse:
         self.prev_position = None  # To store previous valid position
         self.backtracking = False  # Flag to indicate if it's backtracking
         self.visited = set()  # Initialize the visited set to keep track of visited positions
-
+        self.path = [start_pos]
+        
     def move(self, maze):
         x, y = self.position
 

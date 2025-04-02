@@ -9,7 +9,7 @@ cheese_collected = False
 # User level select
 level_choice = input("Select level (1 = Easy, 2 = Medium, 3 = Hard): ")
 if level_choice not in ["1", "2", "3"]:
-    print("Invalid choice! Defaulting to Level 1")
+    print("Defaulting to Level 1")
     level_choice = "1"
 
 level_index = int(level_choice) - 1
@@ -51,7 +51,6 @@ while running:
         # Trigger mouse movement only when MOVE_EVENT is triggered
         if event.type == MOVE_EVENT:
             # Stop if the cheese has been collected
-
                 if not cheese_collected:
                  mouse.move(maze)
                 if not cheese_collected and mouse.position == CHEESE_POS:
@@ -63,10 +62,10 @@ while running:
     draw_maze(screen, maze)
 
     # Draw cheese
-    screen.blit(cheese_img, (CHEESE_POS[0] * CELL_SIZE, CHEESE_POS[1] * CELL_SIZE))
+    if not cheese_collected:
+        screen.blit(cheese_img, (CHEESE_POS[0] * CELL_SIZE, CHEESE_POS[1] * CELL_SIZE))
     # Draw mouse
     mouse.draw(screen, mouse_img)
-
     pygame.display.flip()
     clock.tick(30)  # Frame rate (30 frames per second)
 
