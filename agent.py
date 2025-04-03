@@ -8,8 +8,8 @@ CELL_SIZE = 40
 class Mouse:
     def __init__(self, start_pos):
         self.position = start_pos
-        self.visited = set([start_pos])
-        self.path = [start_pos]
+      #  self.visited = set([start_pos])
+      #  self.path = [start_pos]
         self.mode = "random"  # Default mode
         self.a_star_path = []  # For storing A* path
         self.cheese_pos = None  # Will be set when A* is used
@@ -89,28 +89,17 @@ class Mouse:
         x, y = self.position
         directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]
         random.shuffle(directions)
-        
+
         for dx, dy in directions:
-            new_x = x + dx
-            new_y = y + dy
-            if (0 <= new_x < len(maze[0]) and 
-                0 <= new_y < len(maze) and 
-                maze[new_y][new_x] == 0 and
-                (new_x, new_y) not in self.visited):
-                
+            new_x, new_y = x + dx, y + dy
+            if 0 <= new_x < len(maze[0]) and 0 <= new_y < len(maze) and maze[new_y][new_x] == 0:
                 self.position = (new_x, new_y)
-                self.visited.add(self.position)
-                self.path.append(self.position)
                 return
-        
-        if len(self.path) > 1:
-            self.path.pop()
-            self.position = self.path[-1]
 
     def a_star_move(self):
         if len(self.a_star_path) > 0:
             self.position = self.a_star_path.pop(0)
-            self.visited.add(self.position)
+    #        self.visited.add(self.position)
 
     def draw(self, screen, image):
         screen.blit(image, (self.position[0] * CELL_SIZE, self.position[1] * CELL_SIZE))

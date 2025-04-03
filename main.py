@@ -45,8 +45,6 @@ mouse_img = pygame.transform.scale(mouse_img, (CELL_SIZE, CELL_SIZE))
 cheese_img = pygame.image.load("assets/cheese.png")
 cheese_img = pygame.transform.scale(cheese_img, (CELL_SIZE, CELL_SIZE))
 
-mouse = Mouse(start_pos=(0, 0))
-
 # Timer setup for smooth movement
 MOVE_EVENT = pygame.USEREVENT + 1
 pygame.time.set_timer(MOVE_EVENT, 100)  # Move every 1500 milliseconds (1.5 seconds)
