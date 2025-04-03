@@ -27,13 +27,19 @@ CHEESE_POS = (maze_size[0] - 1, maze_size[1] - 1)
 
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
-mode_choice = input("Select movement mode (1 = Random, 2 = A*): ")
-if mode_choice not in ["1", "2"]:
-    print("Invalid choice! Defaulting to Random")
-    mode_choice = "1"
+mode_choice = input("Select movement mode (1 = Random, 2 = A*, 3 = Greedy): ")
+if mode_choice == "1":
+    mode = "random"
+elif mode_choice == "2":
+    mode = "a_star"
+elif mode_choice == "3":
+    mode = "greedy"
+else:
+    print("Invalid mode selected. Defaulting to random.")
+    mode = "random"
 
 mouse = Mouse(start_pos=(0, 0))
-mouse.set_mode("random" if mode_choice == "1" else "a_star", CHEESE_POS, maze)
+mouse.set_mode(mode, CHEESE_POS, maze)
 
 pygame.init()
 # screen = pygame.display.set_mode((CELL_SIZE * 10, CELL_SIZE * 10))
