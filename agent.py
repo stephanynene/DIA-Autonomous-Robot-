@@ -1,40 +1,116 @@
 import pygame
 import random
+import heapq
+from typing import List, Tuple, Dict, Set
 
 CELL_SIZE = 40
 
 class Mouse:
     def __init__(self, start_pos):
-        self.position = start_pos  # Initial position
-        self.prev_position = None  # To store previous valid position
-        self.backtracking = False  # Flag to indicate if it's backtracking
-        self.visited = set()  # Initialize the visited set to keep track of visited positions
+        self.position = start_pos
+        self.visited = set([start_pos])
         self.path = [start_pos]
-        
-    def move(self, maze):
-        x, y = self.position
+        self.mode = "random"  # Default mode
+        self.a_star_path = []  # For storing A* path
+        self.cheese_pos = None  # Will be set when A* is used
 
-        # Random direction to try to move (up, down, left, right)
+    def set_mode(self, mode: str, cheese_pos: Tuple[int, int] = None, maze=None):
+        self.mode = mode
+        if mode == "a_star" and cheese_pos:
+            self.cheese_pos = cheese_pos
+            self.maze = maze
+            self.calculate_a_star_path()
+
+
+    def calculate_a_star_path(self):
+        """Calculate path using A* algorithm"""
+        if not self.cheese_pos:
+            return
+
+        start = self.position
+        goal = self.cheese_pos
+
+        # A* implementation
+        open_set = []
+        heapq.heappush(open_set, (0, start))
+        came_from = {}
+        g_score = {start: 0}
+        f_score = {start: self.heuristic(start, goal)}
+
+        while open_set:
+            current = heapq.heappop(open_set)[1]
+
+            if current == goal:
+                self.reconstruct_path(came_from, current)
+                return
+
+            for neighbor in self.get_neighbors(current, self.maze):
+                tentative_g_score = g_score[current] + 1
+
+                if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
+                    came_from[neighbor] = current
+                    g_score[neighbor] = tentative_g_score
+                    f_score[neighbor] = tentative_g_score + self.heuristic(neighbor, goal)
+                    heapq.heappush(open_set, (f_score[neighbor], neighbor))
+
+        # If no path found, use random walk
+        self.mode = "random"
+
+    def heuristic(self, a: Tuple[int, int], b: Tuple[int, int]) -> int:
+        """Manhattan distance heuristic"""
+        return abs(a[0] - b[0]) + abs(a[1] - b[1])
+
+    def get_neighbors(self, pos: Tuple[int, int], maze) -> List[Tuple[int, int]]:
+        """Get valid neighboring positions"""
+        x, y = pos
         directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]
-        random.shuffle(directions)  # Randomize the direction to make the movement more random
+        neighbors = []
+        for dx, dy in directions:
+            nx, ny = x + dx, y + dy
+            if 0 <= nx < len(maze[0]) and 0 <= ny < len(maze) and maze[ny][nx] == 0:
+                neighbors.append((nx, ny))
+        return neighbors
 
-        # Try to move to a valid adjacent cell
+    def reconstruct_path(self, came_from: Dict[Tuple[int, int], Tuple[int, int]], current: Tuple[int, int]):
+        """Reconstruct path from A* search"""
+        total_path = [current]
+        while current in came_from:
+            current = came_from[current]
+            total_path.append(current)
+        self.a_star_path = total_path[::-1]  # Reverse to get start to goal
+
+    def move(self, maze):
+        if self.mode == "random":
+            self.random_move(maze)
+        elif self.mode == "a_star" and self.a_star_path:
+            self.a_star_move()
+
+    def random_move(self, maze):
+        x, y = self.position
+        directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]
+        random.shuffle(directions)
+        
         for dx, dy in directions:
             new_x = x + dx
             new_y = y + dy
-            if 0 <= new_x < len(maze[0]) and 0 <= new_y < len(maze) and maze[new_y][new_x] == 0:
-                # Move to the new position if it's valid
+            if (0 <= new_x < len(maze[0]) and 
+                0 <= new_y < len(maze) and 
+                maze[new_y][new_x] == 0 and
+                (new_x, new_y) not in self.visited):
+                
                 self.position = (new_x, new_y)
                 self.visited.add(self.position)
-                break  # Exit the loop once a valid move is found
+                self.path.append(self.position)
+                return
+        
+        if len(self.path) > 1:
+            self.path.pop()
+            self.position = self.path[-1]
 
-        # Handle backtracking (if needed)
-        if self.position == (x, y):  # If no movement has occurred
-            # For backtracking, choose a position from the visited list
-            if self.path:
-                self.pos = self.path.pop()
+    def a_star_move(self):
+        if len(self.a_star_path) > 0:
+            self.position = self.a_star_path.pop(0)
+            self.visited.add(self.position)
 
     def draw(self, screen, image):
-        if self.position is None:  # Ensure position is not None
-            return  # Don't draw if position is None
         screen.blit(image, (self.position[0] * CELL_SIZE, self.position[1] * CELL_SIZE))

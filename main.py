@@ -2,6 +2,8 @@ import pygame
 from environment import draw_maze
 from agent import Mouse
 from levels import MAZE_LEVELS
+from agent import Mouse, CELL_SIZE
+
 
 CELL_SIZE = 40
 cheese_collected = False
@@ -25,6 +27,13 @@ CHEESE_POS = (maze_size[0] - 1, maze_size[1] - 1)
 
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
+mode_choice = input("Select movement mode (1 = Random, 2 = A*): ")
+if mode_choice not in ["1", "2"]:
+    print("Invalid choice! Defaulting to Random")
+    mode_choice = "1"
+
+mouse = Mouse(start_pos=(0, 0))
+mouse.set_mode("random" if mode_choice == "1" else "a_star", CHEESE_POS, maze)
 
 pygame.init()
 # screen = pygame.display.set_mode((CELL_SIZE * 10, CELL_SIZE * 10))
@@ -48,14 +57,11 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-        # Trigger mouse movement only when MOVE_EVENT is triggered
-        if event.type == MOVE_EVENT:
-            # Stop if the cheese has been collected
-                if not cheese_collected:
-                 mouse.move(maze)
-                if not cheese_collected and mouse.position == CHEESE_POS:
-                    cheese_collected = True
-                    print("Cheese collected!")
+        if event.type == MOVE_EVENT and not cheese_collected:
+            mouse.move(maze)
+            if mouse.position == CHEESE_POS:
+                cheese_collected = True
+                print("Cheese collected!")
 
 
     screen.fill((255, 255, 255))
