@@ -54,6 +54,7 @@ class Mouse:
                     heapq.heappush(open_set, (f_score[neighbor], neighbor))
 
         # If no path found, use random walk
+        print("A* failed to find a path. Switching to random.")
         self.mode = "random"
 
     def heuristic(self, a: Tuple[int, int], b: Tuple[int, int]) -> int:
