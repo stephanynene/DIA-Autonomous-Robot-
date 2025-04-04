@@ -14,12 +14,17 @@ class Mouse:
         self.a_star_path = []  # For storing A* path
         self.cheese_pos = None  # Will be set when A* is used
 
-    def set_mode(self, mode: str, cheese_pos: Tuple[int, int] = None, maze=None):
+    def set_mode(self, mode: str, cheese_pos=None, maze=None):
         self.mode = mode
-        if mode == "a_star" and cheese_pos:
+        if cheese_pos:
             self.cheese_pos = cheese_pos
+        if maze:
             self.maze = maze
+
+        if mode == "a_star":
             self.calculate_a_star_path()
+        elif mode == "greedy":
+            self.calculate_greedy_path()
 
 
     def calculate_a_star_path(self):
@@ -85,6 +90,8 @@ class Mouse:
             self.random_move(maze)
         elif self.mode == "a_star" and self.a_star_path:
             self.a_star_move()
+        elif self.mode == "greedy" and self.greedy_path:
+            self.greedy_move()
 
     def random_move(self, maze):
         x, y = self.position
@@ -101,6 +108,48 @@ class Mouse:
         if len(self.a_star_path) > 0:
             self.position = self.a_star_path.pop(0)
     #        self.visited.add(self.position)
+
+    def calculate_greedy_path(self):
+        if not self.cheese_pos or not self.maze:
+            return
+
+        start = self.position
+        goal = self.cheese_pos
+
+        open_set = []
+        heapq.heappush(open_set, (self.heuristic(start, goal), start))
+        came_from = {}
+
+        visited = set()
+
+        while open_set:
+            _, current = heapq.heappop(open_set)
+            visited.add(current)
+
+            if current == goal:
+                self.reconstruct_greedy_path(came_from, current)
+                return
+
+            for neighbor in self.get_neighbors(current, self.maze):
+                if neighbor not in visited:
+                    visited.add(neighbor)
+                    came_from[neighbor] = current
+                    heapq.heappush(open_set, (self.heuristic(neighbor, goal), neighbor))
+
+        # fallback
+        self.mode = "random"
+
+    def reconstruct_greedy_path(self, came_from, current):
+        total_path = [current]
+        while current in came_from:
+            current = came_from[current]
+            total_path.append(current)
+        self.greedy_path = total_path[::-1]
+
+    def greedy_move(self):
+        if len(self.greedy_path) > 0:
+            self.position = self.greedy_path.pop(0)
+
 
     def draw(self, screen, image):
         screen.blit(image, (self.position[0] * CELL_SIZE, self.position[1] * CELL_SIZE))
