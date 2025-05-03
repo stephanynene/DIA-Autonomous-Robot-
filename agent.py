@@ -10,9 +10,9 @@ class Mouse:
         self.position = start_pos
       #  self.visited = set([start_pos])
       #  self.path = [start_pos]
-        self.mode = "random"  # Default mode
-        self.a_star_path = []  # For storing A* path
-        self.cheese_pos = None  # Will be set when A* is used
+        self.mode = "random" 
+        self.a_star_path = []  
+        self.cheese_pos = None  
 
     def set_mode(self, mode: str, cheese_pos=None, maze=None):
         self.mode = mode

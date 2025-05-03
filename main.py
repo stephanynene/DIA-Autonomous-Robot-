@@ -1,4 +1,5 @@
 import pygame
+import random
 from environment import draw_maze
 from agent import Mouse
 from levels import MAZE_LEVELS
@@ -20,10 +21,19 @@ level_data = MAZE_LEVELS[level_index]
 maze = level_data["layout"]
 maze_size = level_data["size"]
 
+CHEESE_POSITIONS = []
+while len(CHEESE_POSITIONS) < 5:  # 5 cheese pieces
+    x = random.randint(0, maze_size[0] - 1)
+    y = random.randint(0, maze_size[1] - 1)
+    if maze[y][x] == 0 and (x, y) != (0, 0):
+        CHEESE_POSITIONS.append((x, y))
+
+CHEESE_POSITIONS.append((maze_size[0] - 1, maze_size[1] - 1)) 
+
+
 WINDOW_WIDTH = maze_size[0] * CELL_SIZE
 WINDOW_HEIGHT = maze_size[1] * CELL_SIZE
 
-CHEESE_POS = (maze_size[0] - 1, maze_size[1] - 1)
 
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
@@ -39,7 +49,7 @@ else:
     mode = "random"
 
 mouse = Mouse(start_pos=(0, 0))
-mouse.set_mode(mode, CHEESE_POS, maze)
+mouse.set_mode(mode, CHEESE_POSITIONS[0], maze)
 
 pygame.init()
 # screen = pygame.display.set_mode((CELL_SIZE * 10, CELL_SIZE * 10))
@@ -53,7 +63,7 @@ cheese_img = pygame.transform.scale(cheese_img, (CELL_SIZE, CELL_SIZE))
 
 # Timer setup for smooth movement
 MOVE_EVENT = pygame.USEREVENT + 1
-pygame.time.set_timer(MOVE_EVENT, 100)  # Move every 1500 milliseconds (1.5 seconds)
+pygame.time.set_timer(MOVE_EVENT, 1000)  # Move every 1500 milliseconds (1.5 seconds)
 
 running = True
 while running:
@@ -61,22 +71,38 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-        if event.type == MOVE_EVENT and not cheese_collected:
-            mouse.move(maze)
-            if mouse.position == CHEESE_POS:
-                cheese_collected = True
-                print("Cheese collected!")
+    if event.type == MOVE_EVENT:
+        mouse.move(maze)
 
 
     screen.fill((255, 255, 255))
     draw_maze(screen, maze)
 
-    # Draw cheese
-    if not cheese_collected:
-        screen.blit(cheese_img, (CHEESE_POS[0] * CELL_SIZE, CHEESE_POS[1] * CELL_SIZE))
+    # Draw all cheeses
+    for cheese_pos in CHEESE_POSITIONS:
+        screen.blit(cheese_img, (cheese_pos[0] * CELL_SIZE, cheese_pos[1] * CELL_SIZE))
+
+    if event.type == MOVE_EVENT:
+        mouse.move(maze)
+
+        # Check if cheese collected
+        for cheese_pos in CHEESE_POSITIONS[:]:
+            if mouse.position == cheese_pos:
+                CHEESE_POSITIONS.remove(cheese_pos)
+                print("Collected a cheese!")
+
+            if CHEESE_POSITIONS:
+                mouse.set_mode(mode, CHEESE_POSITIONS[0], maze)
+
+    # End condition: when all cheeses are collected
+    if not CHEESE_POSITIONS:
+        print("All cheese collected!")
+        running = False  # Exit game
+
     # Draw mouse
     mouse.draw(screen, mouse_img)
     pygame.display.flip()
     clock.tick(30)  # Frame rate (30 frames per second)
 
 pygame.quit()
+
