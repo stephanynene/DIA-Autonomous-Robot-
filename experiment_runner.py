@@ -1,7 +1,8 @@
 import csv
 import time
 from agent import Mouse
-from levels import MAZE_LEVELS
+from environment import generate_maze
+from levels import MAZE_SIZES
 
 # List of AI methods to test
 AI_METHODS = ["random", "greedy", "a_star"]
@@ -15,9 +16,9 @@ def run_experiments():
         writer = csv.writer(file)
         writer.writerow(CSV_HEADER)
 
-        for level_index, level in enumerate(MAZE_LEVELS):
-            maze = level["layout"]
-            cheese_pos = (len(maze[0]) - 1, len(maze) - 1)  # Bottom-right corner as cheese
+        for level_index, maze_size in enumerate(MAZE_SIZES):
+            maze = generate_maze(*maze_size)
+            cheese_pos = (maze_size[0] - 1, maze_size[1] - 1)
 
             for ai_method in AI_METHODS:
                 for run in range(1, NUM_RUNS + 1):
