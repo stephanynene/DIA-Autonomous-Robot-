@@ -50,11 +50,23 @@ def generate_maze(width, height):
     maze[1][0] = 0
 
     # Ensure bottom-right is a path
-    maze[height - 1][width - 1] = 0
+    goal_x, goal_y = width - 1, height - 1
+    maze[goal_y][goal_x] = 0
 
-    # Ensure connection to bottom-right
-    if maze[height - 2][width - 1] == 1 and maze[height - 1][width - 2] == 1:
-        maze[height - 2][width - 1] = 0  # open vertical
-        maze[height - 1][width - 2] = 0  # open horizontal
+    if goal_x > 4 and goal_y > 4:
+        # Tempting dead-end left of goal
+        maze[goal_y][goal_x - 1] = 0
+        maze[goal_y][goal_x - 2] = 0
+        maze[goal_y][goal_x - 3] = 0
+        maze[goal_y - 1][goal_x - 3] = 0
+        maze[goal_y - 2][goal_x - 3] = 0
+
+        # Block further movement (dead end)
+        maze[goal_y - 2][goal_x - 2] = 1
+        maze[goal_y - 2][goal_x - 1] = 1
+
+        # Real valid path from top
+        maze[goal_y - 1][goal_x] = 0
+        maze[goal_y - 2][goal_x] = 0
 
     return maze
