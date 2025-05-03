@@ -8,10 +8,9 @@ CELL_SIZE = 40
 class Mouse:
     def __init__(self, start_pos):
         self.position = start_pos
-      #  self.visited = set([start_pos])
-      #  self.path = [start_pos]
         self.mode = "random" 
         self.a_star_path = []  
+        self.greedy_path = []
         self.cheese_pos = None  
 
     def set_mode(self, mode: str, cheese_pos=None, maze=None):

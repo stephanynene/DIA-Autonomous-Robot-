@@ -1,8 +1,8 @@
 import pygame
 import random
-from environment import draw_maze
+from environment import draw_maze, generate_maze
 from agent import Mouse
-from levels import MAZE_LEVELS
+from levels import MAZE_SIZES
 from agent import Mouse, CELL_SIZE
 
 
@@ -15,11 +15,15 @@ if level_choice not in ["1", "2", "3"]:
     print("Defaulting to Level 1")
     level_choice = "1"
 
-level_index = int(level_choice) - 1
-level_data = MAZE_LEVELS[level_index]
+# level_index = int(level_choice) - 1
+# level_data = MAZE_LEVELS[level_index]
 
-maze = level_data["layout"]
-maze_size = level_data["size"]
+# maze = level_data["layout"]
+# maze_size = level_data["size"]
+
+level_index = int(level_choice) - 1
+maze_size = MAZE_SIZES[level_index]
+maze = generate_maze(*maze_size)
 
 CHEESE_POSITIONS = []
 while len(CHEESE_POSITIONS) < 5:  # 5 cheese pieces
@@ -34,6 +38,7 @@ CHEESE_POSITIONS.append((maze_size[0] - 1, maze_size[1] - 1))
 WINDOW_WIDTH = maze_size[0] * CELL_SIZE
 WINDOW_HEIGHT = maze_size[1] * CELL_SIZE
 
+pygame.init()
 
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
@@ -51,7 +56,6 @@ else:
 mouse = Mouse(start_pos=(0, 0))
 mouse.set_mode(mode, CHEESE_POSITIONS[0], maze)
 
-pygame.init()
 # screen = pygame.display.set_mode((CELL_SIZE * 10, CELL_SIZE * 10))
 pygame.display.set_caption("Mouse and Cheese Maze")
 clock = pygame.time.Clock()
