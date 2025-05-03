@@ -63,7 +63,7 @@ cheese_img = pygame.transform.scale(cheese_img, (CELL_SIZE, CELL_SIZE))
 
 # Timer setup for smooth movement
 MOVE_EVENT = pygame.USEREVENT + 1
-pygame.time.set_timer(MOVE_EVENT, 1000)  # Move every 1500 milliseconds (1.5 seconds)
+pygame.time.set_timer(MOVE_EVENT, 100)  # Move every 1500 milliseconds (1.5 seconds)
 
 running = True
 while running:
@@ -71,10 +71,20 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    if event.type == MOVE_EVENT:
-        mouse.move(maze)
+        elif event.type == MOVE_EVENT:
+            mouse.move(maze)
 
+            # Check if cheese collected
+            for cheese_pos in CHEESE_POSITIONS[:]:  # copy to allow removal during iteration
+                if mouse.position == cheese_pos:
+                    CHEESE_POSITIONS.remove(cheese_pos)
+                    print("Collected a cheese!")
 
+                    # Update target if cheeses remain
+                    if CHEESE_POSITIONS:
+                        mouse.set_mode(mode, CHEESE_POSITIONS[0], maze)
+
+    # Drawing
     screen.fill((255, 255, 255))
     draw_maze(screen, maze)
 
@@ -82,27 +92,16 @@ while running:
     for cheese_pos in CHEESE_POSITIONS:
         screen.blit(cheese_img, (cheese_pos[0] * CELL_SIZE, cheese_pos[1] * CELL_SIZE))
 
-    if event.type == MOVE_EVENT:
-        mouse.move(maze)
-
-        # Check if cheese collected
-        for cheese_pos in CHEESE_POSITIONS[:]:
-            if mouse.position == cheese_pos:
-                CHEESE_POSITIONS.remove(cheese_pos)
-                print("Collected a cheese!")
-
-            if CHEESE_POSITIONS:
-                mouse.set_mode(mode, CHEESE_POSITIONS[0], maze)
-
-    # End condition: when all cheeses are collected
-    if not CHEESE_POSITIONS:
-        print("All cheese collected!")
-        running = False  # Exit game
-
     # Draw mouse
     mouse.draw(screen, mouse_img)
+
     pygame.display.flip()
-    clock.tick(30)  # Frame rate (30 frames per second)
+    clock.tick(30)
+
+    # End condition
+    if not CHEESE_POSITIONS:
+        print("All cheese collected!")
+        running = False
 
 pygame.quit()
 
