@@ -18,6 +18,8 @@ def draw_maze(screen, maze):
             rect = pygame.Rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
             if maze[y][x] == 1:
                 pygame.draw.rect(screen, BLACK, rect)  # Wall
+            elif maze[y][x] == 2:
+                pygame.draw.rect(screen, (139, 69, 19), rect)  # Mud tile (brown)
             else:
                 pygame.draw.rect(screen, WHITE, rect)  # Path
             pygame.draw.rect(screen, GREY, rect, 1)  # Grid lines
@@ -68,5 +70,10 @@ def generate_maze(width, height):
         # Real valid path from top
         maze[goal_y - 1][goal_x] = 0
         maze[goal_y - 2][goal_x] = 0
+
+    for y in range(height):
+        for x in range(width):
+            if maze[y][x] == 0 and random.random() < 0.1:
+                maze[y][x] = 2  # Weighted mud tile
 
     return maze

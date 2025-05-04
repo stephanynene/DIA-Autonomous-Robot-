@@ -12,6 +12,7 @@ class Mouse:
         self.a_star_path = []  
         self.greedy_path = []
         self.cheese_pos = None  
+        self.move_cooldown = 0 
 
     def set_mode(self, mode: str, cheese_pos=None, maze=None):
         self.mode = mode
@@ -49,7 +50,7 @@ class Mouse:
                 return
 
             for neighbor in self.get_neighbors(current, self.maze):
-                tentative_g_score = g_score[current] + 1
+                tentative_g_score = g_score[current] + self.get_cost(neighbor)
 
                 if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
                     came_from[neighbor] = current
@@ -66,15 +67,15 @@ class Mouse:
         return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
     def get_neighbors(self, pos: Tuple[int, int], maze) -> List[Tuple[int, int]]:
-        """Get valid neighboring positions"""
         x, y = pos
         directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]
         neighbors = []
         for dx, dy in directions:
             nx, ny = x + dx, y + dy
-            if 0 <= nx < len(maze[0]) and 0 <= ny < len(maze) and maze[ny][nx] == 0:
+            if 0 <= nx < len(maze[0]) and 0 <= ny < len(maze) and maze[ny][nx] in (0, 2):
                 neighbors.append((nx, ny))
-        return neighbors
+        return neighbors 
+
 
     def reconstruct_path(self, came_from: Dict[Tuple[int, int], Tuple[int, int]], current: Tuple[int, int]):
         """Reconstruct path from A* search"""
@@ -91,6 +92,10 @@ class Mouse:
             self.a_star_move()
         elif self.mode == "greedy" and self.greedy_path:
             self.greedy_move()
+
+        x, y = self.position
+        if self.maze[y][x] == 2:  # Mud
+            self.move_cooldown = 3  # Wait 3 frames on mud
 
     def random_move(self, maze):
         x, y = self.position
@@ -148,6 +153,14 @@ class Mouse:
     def greedy_move(self):
         if len(self.greedy_path) > 0:
             self.position = self.greedy_path.pop(0)
+
+    def get_cost(self, pos):
+        x, y = pos
+        if self.maze[y][x] == 0:
+            return 1  # normal
+        elif self.maze[y][x] == 2:
+            return 100  # heavy/mud tile
+        return float('inf')  # wall or impassable
 
 
     def draw(self, screen, image):
