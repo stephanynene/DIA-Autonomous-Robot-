@@ -42,38 +42,46 @@ def generate_maze(width, height):
                 maze[ny][nx] = 0
                 carve(nx, ny)
 
-    # Start carving from (1, 1)
+    # Start carving
     maze[1][1] = 0
     carve(1, 1)
 
-    # Ensure top-left (0, 0) is clear
+    # Ensure start and goal are accessible
     maze[0][0] = 0
     maze[0][1] = 0
     maze[1][0] = 0
 
-    # Ensure bottom-right is a path
     goal_x, goal_y = width - 1, height - 1
     maze[goal_y][goal_x] = 0
 
-    if goal_x > 4 and goal_y > 4:
-        # Tempting dead-end left of goal
-        maze[goal_y][goal_x - 1] = 0
-        maze[goal_y][goal_x - 2] = 0
-        maze[goal_y][goal_x - 3] = 0
-        maze[goal_y - 1][goal_x - 3] = 0
-        maze[goal_y - 2][goal_x - 3] = 0
-
-        # Block further movement (dead end)
-        maze[goal_y - 2][goal_x - 2] = 1
-        maze[goal_y - 2][goal_x - 1] = 1
-
-        # Real valid path from top
-        maze[goal_y - 1][goal_x] = 0
-        maze[goal_y - 2][goal_x] = 0
-
+    # Add random mud tiles on paths
     for y in range(height):
         for x in range(width):
             if maze[y][x] == 0 and random.random() < 0.1:
-                maze[y][x] = 2  # Weighted mud tile
+                maze[y][x] = 2  # mud
+
+    # Add muddy shortcut: diagonal-ish path from (0, 0) to (goal_x, goal_y)
+    x, y = 0, 0
+    while x < goal_x and y < goal_y:
+        x += 1
+        y += 1
+        if x < width and y < height:
+            maze[y][x] = 2  # force mud
+            if maze[y-1][x] == 1:
+                maze[y-1][x] = 0  # make adjacent cell walkable to blend with maze
+
+    # Add clean longer path (e.g. right 3, down full, right remaining)
+    x, y = 0, 0
+    for _ in range(3):
+        if x + 1 < width:
+            x += 1
+            maze[y][x] = 0
+    while y + 1 < height:
+        y += 1
+        maze[y][x] = 0
+    while x + 1 < width:
+        x += 1
+        maze[y][x] = 0
 
     return maze
+

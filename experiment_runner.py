@@ -9,7 +9,7 @@ AI_METHODS = ["random", "greedy", "a_star"]
 NUM_RUNS = 30
 
 # CSV Header
-CSV_HEADER = ["level", "ai_method", "run", "steps", "time_ms"]
+CSV_HEADER = ["level", "ai_method", "run", "steps", "time_ms", "cost"]
 
 def run_experiments():
     with open("results.csv", mode="w", newline="") as file:
@@ -33,6 +33,7 @@ def run_experiments():
                         steps += 1
 
                     elapsed_time_ms = (time.perf_counter() - start_time) * 1000  # Convert to ms
+                    cost = mouse.get_total_cost()
 
                     # Save results
                     writer.writerow([
@@ -40,10 +41,11 @@ def run_experiments():
                         ai_method,
                         run,
                         steps,
-                        round(elapsed_time_ms, 2)
+                        round(elapsed_time_ms, 2),
+                        cost,
                     ])
 
-                    print(f"Level {level_index + 1}, {ai_method}, Run {run}: {steps} steps, {round(elapsed_time_ms, 2)}ms")
+                    print(f"Level {level_index + 1}, {ai_method}, Run {run}: {steps} steps, {round(elapsed_time_ms, 2)}ms,  Cost: {cost}")
 
 if __name__ == "__main__":
     run_experiments()

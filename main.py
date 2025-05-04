@@ -4,6 +4,28 @@ from environment import draw_maze, generate_maze
 from agent import Mouse
 from levels import MAZE_SIZES
 from agent import Mouse, CELL_SIZE
+from collections import deque
+
+
+def is_reachable(start, goal, maze):
+    """Check if goal is reachable from start using BFS."""
+    queue = deque([start])
+    visited = set([start])
+    directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+
+    while queue:
+        x, y = queue.popleft()
+        if (x, y) == goal:
+            return True
+
+        for dx, dy in directions:
+            nx, ny = x + dx, y + dy
+            if (0 <= nx < len(maze[0]) and 0 <= ny < len(maze)
+                and maze[ny][nx] in (0, 2)
+                and (nx, ny) not in visited):
+                visited.add((nx, ny))
+                queue.append((nx, ny))
+    return False
 
 
 CELL_SIZE = 40
@@ -26,11 +48,12 @@ maze_size = MAZE_SIZES[level_index]
 maze = generate_maze(*maze_size)
 
 CHEESE_POSITIONS = []
-while len(CHEESE_POSITIONS) < 5:  # 5 cheese pieces
+while len(CHEESE_POSITIONS) < 5:
     x = random.randint(0, maze_size[0] - 1)
     y = random.randint(0, maze_size[1] - 1)
-    if maze[y][x] == 0 and (x, y) != (0, 0):
-        CHEESE_POSITIONS.append((x, y))
+    pos = (x, y)
+    if maze[y][x] in (0, 2) and pos != (0, 0) and is_reachable((0, 0), pos, maze):
+        CHEESE_POSITIONS.append(pos)
 
 CHEESE_POSITIONS.append((maze_size[0] - 1, maze_size[1] - 1)) 
 
@@ -76,7 +99,8 @@ while running:
             running = False
 
         elif event.type == MOVE_EVENT:
-            mouse.move(maze)
+            mouse.move(maze, screen=screen, draw_fn=draw_maze, mouse_img=mouse_img, cheese_img=cheese_img,cheese_positions=CHEESE_POSITIONS)
+
 
             # Check if cheese collected
             for cheese_pos in CHEESE_POSITIONS[:]:  # copy to allow removal during iteration

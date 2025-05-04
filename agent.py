@@ -13,9 +13,12 @@ class Mouse:
         self.greedy_path = []
         self.cheese_pos = None  
         self.move_cooldown = 0 
+        self.total_cost = 0  # random walk cost tracking
+
 
     def set_mode(self, mode: str, cheese_pos=None, maze=None):
         self.mode = mode
+        self.total_cost = 0 
         if cheese_pos:
             self.cheese_pos = cheese_pos
         if maze:
@@ -27,8 +30,14 @@ class Mouse:
             self.calculate_greedy_path()
 
 
+    def get_total_cost(self):
+        return self.total_cost
+
+
     def calculate_a_star_path(self):
-        """Calculate path using A* algorithm"""
+
+        self.a_star_path = []
+
         if not self.cheese_pos:
             return
 
@@ -83,19 +92,39 @@ class Mouse:
         while current in came_from:
             current = came_from[current]
             total_path.append(current)
-        self.a_star_path = total_path[::-1]  # Reverse to get start to goal
+        self.a_star_path = total_path[::-1]
+        self.a_star_path = self.a_star_path[1:]  # Skip the current position
+  # Reverse to get start to goal
 
-    def move(self, maze):
+    def move(self, maze, screen=None, draw_fn=None, mouse_img=None, cheese_img=None, cheese_positions=None):
+        next_pos = None
+
         if self.mode == "random":
             self.random_move(maze)
+            return
+
         elif self.mode == "a_star" and self.a_star_path:
+            next_pos = self.a_star_path[0]
+        elif self.mode == "greedy" and self.greedy_path:
+            next_pos = self.greedy_path[0]
+
+        if next_pos:
+            x, y = next_pos
+            if maze[y][x] == 2:
+                # Redraw scene before delaying, so the move is visible
+                if screen and draw_fn and mouse_img:
+                    screen.fill((255, 255, 255))
+                    draw_fn(screen, maze)  # redraw maze
+                    for cheese_pos in cheese_positions:
+                        screen.blit(cheese_img, (cheese_pos[0] * CELL_SIZE, cheese_pos[1] * CELL_SIZE))
+                    screen.blit(mouse_img, (self.position[0] * CELL_SIZE, self.position[1] * CELL_SIZE))
+                    pygame.display.flip()
+                pygame.time.delay(10)
+
+        if self.mode == "a_star" and self.a_star_path:
             self.a_star_move()
         elif self.mode == "greedy" and self.greedy_path:
             self.greedy_move()
-
-        x, y = self.position
-        if self.maze[y][x] == 2:  # Mud
-            self.move_cooldown = 3  # Wait 3 frames on mud
 
     def random_move(self, maze):
         x, y = self.position
@@ -104,14 +133,21 @@ class Mouse:
 
         for dx, dy in directions:
             new_x, new_y = x + dx, y + dy
-            if 0 <= new_x < len(maze[0]) and 0 <= new_y < len(maze) and maze[new_y][new_x] == 0:
+            if 0 <= new_x < len(maze[0]) and 0 <= new_y < len(maze) and maze[new_y][new_x] in (0, 2):
+                tile_type = maze[new_y][new_x]
+                self.total_cost += self.get_cost((new_x, new_y))
                 self.position = (new_x, new_y)
+
+                if tile_type == 2:
+                    pygame.time.delay(10)  # Delay for mud
+
                 return
 
     def a_star_move(self):
         if len(self.a_star_path) > 0:
-            self.position = self.a_star_path.pop(0)
-    #        self.visited.add(self.position)
+            next_pos = self.a_star_path.pop(0)
+            self.total_cost += self.get_cost(next_pos)
+            self.position = next_pos
 
     def calculate_greedy_path(self):
         if not self.cheese_pos or not self.maze:
@@ -149,10 +185,13 @@ class Mouse:
             current = came_from[current]
             total_path.append(current)
         self.greedy_path = total_path[::-1]
+        self.greedy_path = self.greedy_path[1:]
 
     def greedy_move(self):
         if len(self.greedy_path) > 0:
-            self.position = self.greedy_path.pop(0)
+            next_pos = self.greedy_path.pop(0)
+            self.total_cost += self.get_cost(next_pos)
+            self.position = next_pos
 
     def get_cost(self, pos):
         x, y = pos
